@@ -10,7 +10,7 @@ public class HelloController {
 
   @GetMapping("/hello")
   public String hello() {
-    return "Hello from Spring Boot, version 2.1!";
+    return "Hello from Spring Boot, version 2.3!";
   }
 
 }

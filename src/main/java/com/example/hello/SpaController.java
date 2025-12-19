@@ -15,6 +15,6 @@ public class SpaController {
     public Resource index() {
         // This explicitly looks inside your JAR's /static/ folder
         // regardless of the OS working directory.
-        return new ClassPathResource("/static/index.html");
+        return new ClassPathResource("static/index.html");
     }
 }
