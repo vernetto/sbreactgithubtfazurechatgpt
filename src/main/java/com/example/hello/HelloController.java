@@ -12,4 +12,9 @@ public class HelloController {
   public String hello() {
     return "Hello from Spring Boot!";
   }
+
+  @GetMapping("/")
+  public String index() {
+    return "index.html";
+  }
 }
