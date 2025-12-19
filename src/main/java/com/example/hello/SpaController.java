@@ -1,34 +1,31 @@
 package com.example.hello;
 
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 import java.io.InputStream;
 
-@Controller
+@RestController
 public class SpaController {
 
     @GetMapping(value = {"/", "/**/{path:[^\\.]+}"})
-    @ResponseBody
-    public ResponseEntity<Resource> index() {
-        try {
-            // We use the ClassLoader directly.
-            // Do NOT use a leading slash here.
-            InputStream is = getClass().getClassLoader().getResourceAsStream("static/index.html");
+    public void index(HttpServletResponse response) throws IOException {
+        // Use ClassLoader directly to find the file inside BOOT-INF/classes/static/
+        // Note: No leading slash here is often safer for strict ClassLoaders
+        InputStream is = getClass().getClassLoader().getResourceAsStream("static/index.html");
 
-            if (is == null) {
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.TEXT_HTML)
-                    .body(new InputStreamResource(is));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+        if (is == null) {
+            response.sendError(404, "index.html not found in JAR");
+            return;
         }
+
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+
+        // Stream the content directly to the response body
+        StreamUtils.copy(is, response.getOutputStream());
     }
 }
