@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.120"
+      version = "~> 4.1.0"
     }
   }
 }
@@ -35,10 +35,12 @@ resource "azurerm_linux_web_app" "app" {
   https_only = true
 
   site_config {
-    always_on = true
+    always_on = false
 
     application_stack {
-      java_version = "25"
+      java_version = "17"
+      java_server = "JAVA"
+      java_server_version = "17"
     }
 
     # The GitHub workflow deploys the JAR to /home/site/wwwroot/app.jar

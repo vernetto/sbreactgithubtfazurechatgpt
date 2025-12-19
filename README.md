@@ -155,3 +155,12 @@ The Azure Web App name created by Terraform (value of Terraform output `app_name
 - Everything is reproducible from code and documented steps
 - No separate frontend hosting
 - No manual deployment steps beyond Terraform and GitHub Secrets setup
+
+
+$env:ARM_SUBSCRIPTION_ID="XXXXXXXXXXXX"
+
+az ad sp create-for-rbac --name "github-deployer" --role contributor --scopes /subscriptions/XXXXXXXXXXXX --sdk-auth
+
+add it into github repository secrets as APP_CREDENTIALS
+
+

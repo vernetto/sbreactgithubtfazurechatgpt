@@ -13,11 +13,11 @@ variable "resource_group_name" {
 variable "name_prefix" {
   description = "Prefix used for resource names (must be globally unique for the web app name when combined with '-app')"
   type        = string
-  default     = "hello-rs-<change-me>"
+  default     = "hello-rs-pv001"
 }
 
 variable "app_service_sku" {
   description = "App Service plan SKU"
   type        = string
-  default     = "B1"
+  default     = "F1"
 }
