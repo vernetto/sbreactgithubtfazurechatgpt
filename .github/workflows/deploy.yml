@@ -2,14 +2,14 @@ name: Build and Deploy to Azure App Service
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
-  JAVA_VERSION: "25"
+  JAVA_VERSION: "17"
   # Expose these as needed; app name comes from Terraform output.
   # AZURE_WEBAPP_NAME: "<set in GitHub Secrets or env>"
   # AZURE_WEBAPP_PACKAGE_PATH: "target/*.jar"
