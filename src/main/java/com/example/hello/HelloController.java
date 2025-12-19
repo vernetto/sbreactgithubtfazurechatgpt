@@ -13,8 +13,4 @@ public class HelloController {
     return "Hello from Spring Boot, version 1.0!";
   }
 
-  @GetMapping("/")
-  public String index() {
-    return "index.html";
-  }
 }
