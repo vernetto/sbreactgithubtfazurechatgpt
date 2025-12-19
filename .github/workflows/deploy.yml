@@ -1,0 +1,53 @@
+name: Build and Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: "25"
+  # Expose these as needed; app name comes from Terraform output.
+  # AZURE_WEBAPP_NAME: "<set in GitHub Secrets or env>"
+  # AZURE_WEBAPP_PACKAGE_PATH: "target/*.jar"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: "maven"
+
+      - name: Build (React + Spring Boot) with Maven
+        run: mvn -B clean package
+
+      # Login using a Service Principal JSON stored in GitHub Secret APP_CREDENTIALS
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.APP_CREDENTIALS }}
+
+      # Deploy the JAR as app.jar so Terraform startup command can reference it
+      - name: Prepare deployment artifact
+        run: |
+          ls -lah target
+          JAR_PATH=$(ls target/*SNAPSHOT.jar | head -n 1)
+          echo "Using JAR: $JAR_PATH"
+          cp "$JAR_PATH" target/app.jar
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          package: target/app.jar
