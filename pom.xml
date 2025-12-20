@@ -43,6 +43,8 @@
   </dependencies>
 
   <build>
+    <finalName>app</finalName>
+
     <plugins>
 
       <plugin>
