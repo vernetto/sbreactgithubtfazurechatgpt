@@ -6,35 +6,39 @@
   <groupId>com.example</groupId>
   <artifactId>hello-react-spring</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
   <name>hello-react-spring</name>
   <description>Single Maven project packaging React into Spring Boot static resources</description>
 
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.0.0</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
   <properties>
     <java.version>17</java.version>
-    <spring-boot.version>4.0.0</spring-boot.version>
     <frontend.dir>${project.basedir}/frontend</frontend.dir>
+    <!-- This is only informational; frontend-maven-plugin will download Node -->
     <node.version>v24.12.0</node.version>
-    <npm.version>11.6.2</npm.version>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring-boot.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
+    <!-- Web / REST API -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
+    <!-- (Optional) Actuator -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <!-- Tests -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -43,37 +47,43 @@
   </dependencies>
 
   <build>
-    <plugins>
+    <!-- Make the artifact name deterministic for Docker -->
+    <finalName>app</finalName>
 
+    <plugins>
+      <!-- Compile with Java 17 (inherited from Spring Boot parent, but OK to be explicit) -->
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <layers enabled="true"/>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
         </configuration>
       </plugin>
 
-      <!-- 1) Install Node + npm locally (no global tools required) -->
+      <!-- Build the React frontend -->
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
         <version>1.15.0</version>
+
         <configuration>
           <workingDirectory>${frontend.dir}</workingDirectory>
         </configuration>
+
         <executions>
+          <!-- Install Node + npm locally for the build -->
           <execution>
             <id>install-node-and-npm</id>
             <goals>
               <goal>install-node-and-npm</goal>
             </goals>
-            <phase>generate-resources</phase>
             <configuration>
               <nodeVersion>${node.version}</nodeVersion>
-              <npmVersion>${npm.version}</npmVersion>
             </configuration>
           </execution>
 
+          <!-- Install dependencies -->
           <execution>
             <id>npm-install</id>
             <goals>
@@ -81,11 +91,12 @@
             </goals>
             <phase>generate-resources</phase>
             <configuration>
+              <!-- use 'install' instead of 'ci' to avoid package-lock issues -->
               <arguments>install</arguments>
             </configuration>
           </execution>
 
-          <!-- 2) Build React -->
+          <!-- Run React build (e.g. Vite, CRA, etc.) -->
           <execution>
             <id>npm-build</id>
             <goals>
@@ -99,13 +110,13 @@
         </executions>
       </plugin>
 
-      <!-- 3) Copy React build into src/main/resources/static -->
+      <!-- Copy built frontend to Spring Boot static resources -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.3.1</version>
         <executions>
           <execution>
-            <id>copy-react-build</id>
+            <id>copy-frontend</id>
             <phase>process-resources</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -123,6 +134,8 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- Spring Boot repackage to fat jar (app.jar) -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -137,4 +150,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>
